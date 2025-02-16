@@ -47,10 +47,27 @@ class CollectionService
         $this->save();
     }
 
-    public function list(string $type, ?string $unit = 'g'): array
+    public function list(string $type, ?string $unit = 'g', ?array $filters = []): array
     {
         $repository = ($type === 'fruit') ? Fruit::class : Vegetable::class;
-        $items = $this->entityManager->getRepository($repository)->findAll();
+        $queryBuilder = $this->entityManager->getRepository($repository)->createQueryBuilder('i');
+        // Apply filters
+        if (!empty($filters['name'])) {
+            $queryBuilder->andWhere('i.name LIKE :name')
+                ->setParameter('name', '%' . $filters['name'] . '%');
+        }
+
+        if (!empty($filters['minWeight'])) {
+            $queryBuilder->andWhere('i.weight >= :minWeight')
+                ->setParameter('minWeight', $filters['minWeight']);
+        }
+
+        if (!empty($filters['maxWeight'])) {
+            $queryBuilder->andWhere('i.weight <= :maxWeight')
+                ->setParameter('maxWeight', $filters['maxWeight']);
+        }
+
+        $items = $queryBuilder->getQuery()->getResult();
 
         return array_map(fn($item) => [
             'id' => $item->getId(),

@@ -17,34 +17,6 @@ class CollectionServiceTest extends KernelTestCase
         $this->collectionService = $container->get(CollectionService::class);
     }
 
-    public function testProcessJsonFile(): void
-    {
-        // Reset data if not empty
-        $this->collectionService->removeAll();
-
-        //Retrieve data
-        $fruits = $this->collectionService->list('fruit');
-        $vegetables = $this->collectionService->list('vegetable');
-
-        // Assertions
-        $this->assertEmpty($fruits);
-        $this->assertEmpty($vegetables);
-
-        $filePath = self::$kernel->getProjectDir() . '/request.json';
-        $this->assertFileExists($filePath);
-
-        // Process file
-        $this->collectionService->processJsonFile($filePath);
-
-        //Retrieve data
-        $fruits = $this->collectionService->list('fruit');
-        $vegetables = $this->collectionService->list('vegetable');
-
-        // Assertions
-        $this->assertNotEmpty($fruits);
-        $this->assertNotEmpty($vegetables);
-    }
-
     public function testAdd(): void
     {
         $this->collectionService->add('fruit', 'Mango', 3, 'kg');
@@ -80,5 +52,33 @@ class CollectionServiceTest extends KernelTestCase
 
         // Assertions
         $this->assertEmpty($vegetablesAfter);
+    }
+
+    public function testProcessJsonFile(): void
+    {
+        // Reset data if not empty
+        $this->collectionService->removeAll();
+
+        //Retrieve data
+        $fruits = $this->collectionService->list('fruit');
+        $vegetables = $this->collectionService->list('vegetable');
+
+        // Assertions
+        $this->assertEmpty($fruits);
+        $this->assertEmpty($vegetables);
+
+        $filePath = self::$kernel->getProjectDir() . '/request.json';
+        $this->assertFileExists($filePath);
+
+        // Process file
+        $this->collectionService->processJsonFile($filePath);
+
+        //Retrieve data
+        $fruits = $this->collectionService->list('fruit');
+        $vegetables = $this->collectionService->list('vegetable');
+
+        // Assertions
+        $this->assertNotEmpty($fruits);
+        $this->assertNotEmpty($vegetables);
     }
 }

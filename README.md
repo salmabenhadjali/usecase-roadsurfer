@@ -1,59 +1,156 @@
-# 🍎🥕 Fruits and Vegetables
+# **Fruits and Vegetables API Documentation**
 
-## 🎯 Goal
-We want to build a service which will take a `request.json` and:
-* Process the file and create two separate collections for `Fruits` and `Vegetables`
-* Each collection has methods like `add()`, `remove()`, `list()`;
-* Units have to be stored as grams;
-* Store the collections in a storage engine of your choice. (e.g. Database, In-memory)
-* Provide an API endpoint to query the collections. As a bonus, this endpoint can accept filters to be applied to the returning collection.
-* Provide another API endpoint to add new items to the collections (i.e., your storage engine).
-* As a bonus you might:
-  * consider giving option to decide which units are returned (kilograms/grams);
-  * how to implement `search()` method collections;
-  * use latest version of Symfony's to embbed your logic 
+## **Project Overview**
 
-### ✔️ How can I check if my code is working?
-You have two ways of moving on:
-* You call the Service from PHPUnit test like it's done in dummy test (just run `bin/phpunit` from the console)
+This project provides a RESTful API to manage collections of Fruits and Vegetables. It supports adding, listing, and filtering items while ensuring weight units are standardized to grams (`g`) or kilograms (`kg`). The application runs inside a Docker container and utilizes Symfony with Doctrine ORM.
 
-or
+---
 
-* You create a Controller which will be calling the service with a json payload
+## **How to Test**
 
-## 💡 Hints before you start working on it
-* Keep KISS, DRY, YAGNI, SOLID principles in mind
-* Timebox your work - we expect that you would spend between 3 and 4 hours.
-* Your code should be tested
+### **1. Clone the Project**
 
-## When you are finished
-* Please upload your code to a public git repository (i.e. GitHub, Gitlab)
-
-## 🐳 Docker image
-Optional. Just here if you want to run it isolated.
-
-### 📥 Pulling image
 ```bash
-docker pull tturkowski/fruits-and-vegetables
+git clone git@github.com:salmabenhadjali/usecase-roadsurfer.git
+cd usecase-roadsurfer
 ```
 
-### 🧱 Building image
+### **2. Build the Docker Image**
+
 ```bash
 docker build -t tturkowski/fruits-and-vegetables -f docker/Dockerfile .
 ```
 
-### 🏃‍♂️ Running container
+### **3. Prepare the Environment**
+
 ```bash
-docker run -it -w/app -v$(pwd):/app tturkowski/fruits-and-vegetables sh 
+docker run -it -w/app -v$(pwd):/app -p8080:8080 tturkowski/fruits-and-vegetables composer install
 ```
 
-### 🛂 Running tests
+### **4. Create the Database**
+
 ```bash
-docker run -it -w/app -v$(pwd):/app tturkowski/fruits-and-vegetables bin/phpunit
+docker run -it -w/app -v$(pwd):/app -p8080:8080 tturkowski/fruits-and-vegetables bin/console doctrine:migrations:migrate
 ```
 
-### ⌨️ Run development server
+### **5. Run Unit Tests**
+
+```bash
+docker run -it -w/app -v$(pwd):/app -p8080:8080 tturkowski/fruits-and-vegetables bin/phpunit
+exit
+```
+
+### **6. Start the Server**
+
 ```bash
 docker run -it -w/app -v$(pwd):/app -p8080:8080 tturkowski/fruits-and-vegetables php -S 0.0.0.0:8080 -t /app/public
-# Open http://127.0.0.1:8080 in your browser
 ```
+
+---
+
+## **API Endpoints**
+
+### **1. List & Filter Items**
+
+**Endpoint:**
+
+```http
+GET /api/list/{type}
+```
+
+**Example Request:**
+
+```bash
+curl -X GET "http://127.0.0.1:8080/api/list/fruit?name=a&unit=g&maxWeight=10000"
+```
+
+**Query Parameters:**
+
+| Parameter   | Type   | Required | Description                                  |
+| ----------- | ------ | -------- | -------------------------------------------- |
+| `type`      | string | ✅       | Collection type (`fruit` or `vegetable`)     |
+| `name`      | string | ❌       | Filters results by name (e.g., `name=Apple`) |
+| `unit`      | string | ❌       | Weight unit (`kg` or `g`), default is `g`    |
+| `minWeight` | int    | ❌       | Filters results by minimum weight            |
+| `maxWeight` | int    | ❌       | Filters results by maximum weight            |
+
+**Example Response:**
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Apples",
+    "weight": 5000,
+    "unit": "g"
+  }
+]
+```
+
+### **2. Add an Item**
+
+**Endpoint:**
+
+```http
+POST /api/add
+```
+
+**Example Request:**
+
+```bash
+curl -X POST http://127.0.0.1:8080/api/add \
+     -H "Content-Type: application/json" \
+     -d '{"type": "fruit", "name": "Apple", "quantity": 200, "unit": "kg"}'
+```
+
+**Request Body:**
+
+```json
+{
+  "type": "fruit",
+  "name": "Apple",
+  "quantity": 200,
+  "unit": "kg"
+}
+```
+
+**Example Response:**
+
+```json
+{
+  "message": "Item added successfully"
+}
+```
+
+---
+
+## **Database Schema**
+
+### **Fruits Table (`fruits`)**
+
+| Column   | Type   | Constraints                 |
+| -------- | ------ | --------------------------- |
+| `id`     | int    | Primary Key, Auto-Increment |
+| `name`   | string | Not Null                    |
+| `weight` | int    | Not Null (Stored in grams)  |
+
+### **Vegetables Table (`vegetables`)**
+
+| Column   | Type   | Constraints                 |
+| -------- | ------ | --------------------------- |
+| `id`     | int    | Primary Key, Auto-Increment |
+| `name`   | string | Not Null                    |
+| `weight` | int    | Not Null (Stored in grams)  |
+
+---
+
+## **Validation Rules**
+
+- `type` must be either **`fruit`** or **`vegetable`**.
+- `name` **must not be empty**.
+- `quantity` **must be a positive integer**.
+- `unit` must be either **`kg`** or **`g`**.
+
+---
+
+### 🎉 **Now You Are Ready to Use the Fruits and Vegetables API!**

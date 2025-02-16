@@ -45,7 +45,7 @@ abstract class Item
 
     public function setWeight(int $weight, ?string $unit = 'g'): static
     {
-        $this->weight = ($unit === 'kg') ? $weight * 1000 : $this->weight;
+        $this->weight = ($unit === 'kg') ? $weight * 1000 : $weight;
 
         return $this;
     }

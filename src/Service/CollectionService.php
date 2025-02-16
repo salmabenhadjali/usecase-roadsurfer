@@ -17,6 +17,14 @@ class CollectionService
 
     public function add(string $type, string $name, int $weight, string $unit = 'g'): void
     {
+        if (!in_array($type, ['fruit', 'vegetable'])) {
+            throw new \InvalidArgumentException("The type must be either 'fruit' or 'vegetable'.");
+        }
+
+        if (!in_array($unit, ['g', 'kg'])) {
+            throw new \InvalidArgumentException("The unit must be either 'g' or 'kg'.");
+        }
+
         $item = ($type === 'fruit') ? new Fruit() : new Vegetable();
         $item->setName($name);
         $item->setWeight($weight, $unit);
@@ -49,6 +57,14 @@ class CollectionService
 
     public function list(string $type, ?string $unit = 'g', ?array $filters = []): array
     {
+        if (!in_array($type, ['fruit', 'vegetable'])) {
+            throw new \InvalidArgumentException("The type must be either 'fruit' or 'vegetable'.");
+        }
+
+        if (!in_array($unit, ['g', 'kg'])) {
+            throw new \InvalidArgumentException("The unit must be either 'g' or 'kg'.");
+        }
+
         $repository = ($type === 'fruit') ? Fruit::class : Vegetable::class;
         $queryBuilder = $this->entityManager->getRepository($repository)->createQueryBuilder('i');
         // Apply filters

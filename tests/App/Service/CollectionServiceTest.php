@@ -9,14 +9,24 @@ class CollectionServiceTest extends KernelTestCase
 {
     private CollectionService $collectionService;
 
+    public static function setUpBeforeClass(): void
+    {
+        fwrite(STDOUT, "\nStarting CollectionService Tests...\n");
+    }
+
     protected function setUp(): void
     {
         self::bootKernel();
         $container = static::getContainer();
 
         $this->collectionService = $container->get(CollectionService::class);
+
+        fwrite(STDOUT, "\nRunning Test: " . $this->getName() . "\n");
     }
 
+    /**
+     * @testdox A user can successfully add a fruit with a valid name and weight
+     */
     public function testAdd(): void
     {
         $this->collectionService->add('fruit', 'Mango', 3, 'kg');
@@ -31,6 +41,9 @@ class CollectionServiceTest extends KernelTestCase
         $this->assertEquals(3000, $fruit['weight']);
     }
 
+    /**
+     * @testdox A user can successfully remove a vegetable
+     */
     public function testRemove(): void
     {
         // Reset data if not empty
@@ -54,6 +67,9 @@ class CollectionServiceTest extends KernelTestCase
         $this->assertEmpty($vegetablesAfter);
     }
 
+    /**
+     * @testdox Processing a JSON file correctly separates fruits and vegetables into their respective collections
+     */
     public function testProcessJsonFile(): void
     {
         // Reset data if not empty
@@ -80,5 +96,29 @@ class CollectionServiceTest extends KernelTestCase
         // Assertions
         $this->assertNotEmpty($fruits);
         $this->assertNotEmpty($vegetables);
+    }
+
+    /**
+     * @testdox An invalid type should return an error when trying to add an item
+     */
+    public function testInvalidTypeThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("The type must be either 'fruit' or 'vegetable'.");
+
+        // Attempt to add an invalid type
+        $this->collectionService->add('meat', 'Steak', 500, 'g');
+    }
+
+    /**
+     * @testdox An invalid unit should return an error when trying to add an item
+     */
+    public function testInvalidUnitThrowsException(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("The unit must be either 'g' or 'kg'.");
+
+        // Attempt to add an invalid type
+        $this->collectionService->add('fruit', 'Steak', 500, 'litters');
     }
 }

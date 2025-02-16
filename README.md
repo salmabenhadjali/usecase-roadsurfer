@@ -37,7 +37,6 @@ docker run -it -w/app -v$(pwd):/app -p8080:8080 tturkowski/fruits-and-vegetables
 
 ```bash
 docker run -it -w/app -v$(pwd):/app -p8080:8080 tturkowski/fruits-and-vegetables bin/phpunit
-exit
 ```
 
 ### **6. Start the Server**
